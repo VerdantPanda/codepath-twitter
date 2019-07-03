@@ -40,7 +40,6 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
 
         viewHolder.tvBody.setText(tweet.body);
         viewHolder.tvUserName.setText(tweet.user.screenName);
-        //do some stuff with Glide and the profile image
         Glide.with(context).load(tweet.user.profileImageUrl).into(viewHolder.ivProfileImage);
 
     }
