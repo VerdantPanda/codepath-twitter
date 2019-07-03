@@ -1,11 +1,15 @@
 package com.codepath.apps.restclienttemplate;
 
 import android.content.Intent;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -25,6 +29,7 @@ public class TimelineActivity extends AppCompatActivity {
     private TweetAdapter tweetAdapter;
     private List<Tweet> tweets;
     private RecyclerView rvTweets;
+    private FloatingActionButton fab;
 
     public final static int COMPOSE_TWEET_REQUEST_CODE = 10;
 
@@ -46,6 +51,17 @@ public class TimelineActivity extends AppCompatActivity {
         rvTweets.setLayoutManager(new LinearLayoutManager(this));
 
         rvTweets.setAdapter(tweetAdapter);
+
+        fab = findViewById(R.id.fab);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                composeMessage();
+            }
+        });
+
+
 
         //getSupportActionBar().icon
 
@@ -92,6 +108,7 @@ public class TimelineActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                Toast.makeText(getApplicationContext(), "Too many Twitter API requests", Toast.LENGTH_LONG).show();
                 Log.d("Twitter Client", errorResponse.toString());
                 throwable.printStackTrace();
             }
@@ -106,9 +123,25 @@ public class TimelineActivity extends AppCompatActivity {
     }
 
     private void composeMessage() {
+
         Intent composeTweet = new Intent(this, ComposeActivity.class);
         startActivityForResult(composeTweet, COMPOSE_TWEET_REQUEST_CODE);
+        onActivityResult(COMPOSE_TWEET_REQUEST_CODE, -1 ,composeTweet);
+
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+
+        if(resultCode == RESULT_OK){
+            //data.getExtras();
+            //data.getExtras().get();
+            //TODO: finish updating list.
+            //extract message
+        } else{
+
+        }
+    }
 }
