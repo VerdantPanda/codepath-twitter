@@ -2,7 +2,9 @@ package com.codepath.apps.restclienttemplate.models;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.parceler.Parcel;
 
+@Parcel
 public class User {
     public String name;
     public long uid;
@@ -17,6 +19,10 @@ public class User {
         user.profileImageUrl = jsonObject.getString("profile_image_url");
 
         return user;
+    }
+
+    public User() {
+
     }
 
 }

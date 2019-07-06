@@ -41,6 +41,11 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         viewHolder.tvBody.setText(tweet.body);
         viewHolder.tvUserName.setText(tweet.user.screenName);
         Glide.with(context).load(tweet.user.profileImageUrl).into(viewHolder.ivProfileImage);
+        if (tweet.hasEntities) {
+            Glide.with(context).load(tweet.entity.loadURL).into(viewHolder.tweet_entity);
+        } else {
+            viewHolder.tweet_entity.setVisibility(View.GONE);
+        }
 
     }
 
@@ -55,12 +60,14 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         public ImageView ivProfileImage;
         public TextView tvUserName;
         public TextView tvBody;
+        public ImageView tweet_entity;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivProfileImage = (ImageView) itemView.findViewById(R.id.ivProfileImage);
             tvUserName = itemView.findViewById(R.id.tvUserName);
             tvBody = itemView.findViewById(R.id.tvBody);
+            tweet_entity = itemView.findViewById(R.id.tweet_entity);
         }
     }
 

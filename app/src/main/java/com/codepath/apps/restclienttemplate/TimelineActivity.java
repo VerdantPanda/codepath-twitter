@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
@@ -30,6 +31,8 @@ public class TimelineActivity extends AppCompatActivity {
     private List<Tweet> tweets;
     private RecyclerView rvTweets;
     private FloatingActionButton fab;
+    private EndlessRecyclerViewScrollListener scrollListener;
+    private long maxId = 0;
 
     public final static int COMPOSE_TWEET_REQUEST_CODE = 10;
 
@@ -44,11 +47,25 @@ public class TimelineActivity extends AppCompatActivity {
         // find the RecyclerView
         rvTweets = (RecyclerView) findViewById(R.id.rvTweet);
 
+        //rvTweets.addOnScrollListener();
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        scrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                loadNextDataFromApi(page);
+            }
+
+
+        };
+
+        rvTweets.addOnScrollListener(scrollListener);
+
+
         tweets = new ArrayList<>();
 
         tweetAdapter = new TweetAdapter(tweets);
 
-        rvTweets.setLayoutManager(new LinearLayoutManager(this));
+        rvTweets.setLayoutManager(layoutManager);
 
         rvTweets.setAdapter(tweetAdapter);
 
@@ -62,17 +79,38 @@ public class TimelineActivity extends AppCompatActivity {
         });
 
 
-
         //getSupportActionBar().icon
 
-        populateTimeline();
+        populateTimeline(maxId);
+    }
+
+
+    public void loadNextDataFromApi(int offset) {
+        maxId = tweets.get(tweets.size() - 1).uid;
+        // Send an API request to retrieve appropriate paginated data
+        populateTimeline(maxId);
+        //  --> Send the request including an offset value (i.e `page`) as a query parameter.
+        //  --> Deserialize and construct new model objects from the API response
+        //  --> Append the new data objects to the existing set of items inside the array of items
+        //  --> Notify the adapter of the new items made with `notifyItemRangeInserted()`
     }
 
 
 
 
-    private void populateTimeline() {
-        client.getHomeTimeline(new JsonHttpResponseHandler() {
+
+
+
+
+
+
+
+
+
+
+
+    private void populateTimeline(long maxId) {
+        client.getHomeTimeline(maxId, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 Log.d("Twitter Client", response.toString());
@@ -123,10 +161,9 @@ public class TimelineActivity extends AppCompatActivity {
     }
 
     private void composeMessage() {
-
         Intent composeTweet = new Intent(this, ComposeActivity.class);
         startActivityForResult(composeTweet, COMPOSE_TWEET_REQUEST_CODE);
-        onActivityResult(COMPOSE_TWEET_REQUEST_CODE, -1 ,composeTweet);
+        //onActivityResult(COMPOSE_TWEET_REQUEST_CODE, -1 ,composeTweet);
 
     }
 
@@ -135,13 +172,16 @@ public class TimelineActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
 
-        if(resultCode == RESULT_OK){
-            //data.getExtras();
-            //data.getExtras().get();
-            //TODO: finish updating list.
+        if (resultCode == RESULT_OK) {
             //extract message
-        } else{
+            Tweet response = (Tweet) data.getExtras().get("newTweet");
+            tweets.add(0, response);
+            tweetAdapter.notifyItemChanged(0);
+            Toast.makeText(getApplicationContext(), "Result Ok response", Toast.LENGTH_LONG).show();
 
+            // TODO: finish updating list.
+        } else {
+            Toast.makeText(getApplicationContext(), "Error sending tweet, OnActivityResult", Toast.LENGTH_LONG).show();
         }
     }
 }
